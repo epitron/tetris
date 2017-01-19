@@ -5,49 +5,28 @@ require_relative 'drawing'
 class Piece
 
   #------------------------------------------------------------
-  attr_accessor :top, :left, :width, :height, :buf
-  #------------------------------------------------------------
+
+  attr_accessor :left, :top, :buf
 
   def initialize(a, color, left=0, top=0)
-    @buf  = Buffer.new(a, "x" => color, " " => 0)
-    @left = left
-    @top  = top
+    @left, @top = left, top
+    @buf = Buffer.new(a, "x" => color, " " => 0)
   end
 
   #------------------------------------------------------------
-
-  alias_method :x, :left
-  alias_method :y, :top
-
-  def right;  @left + (@width); end
-  def bottom; @top + (@height); end
 
   def width;  @buf.width; end
   def height; @buf.height; end
 
-  #------------------------------------------------------------
+  def right;  @left + width; end
+  def bottom; @top + height; end
 
-  def rotate!(n)
-    @buf.rotate!(n)
-  end
-
-  def drop!(n=1)
-    @top += n
-  end
-
-  def drop(n=1)
-    dup.tap &:drop!
-  end
+  alias_method :x, :left
+  alias_method :y, :top
 
   #------------------------------------------------------------
 
-  def to_s
-    @a.map { |row| row.join }.join("\n")
-  end
-
-  #------------------------------------------------------------
-
-  PIECE_TEMPLATES = [
+  PIECE_TEMPLATES = {
     ["xxxx"] => :light_cyan,
 
     ["xx",
@@ -67,12 +46,34 @@ class Piece
 
     [" xx",
      "xx "]  => :light_green,
-  ]
+  }
 
   def self.all
     @@all ||= PIECE_TEMPLATES.map do |a, color|
-      Piece.new(a, color, 0, 0)
+      new(a.map(&:chars), color)
     end
+  end
+
+  #------------------------------------------------------------
+  def move_x!(dx)
+    @left += dx
+  end
+
+  def rotate(n)
+    dup.rotate!(n)
+  end
+
+  def rotate!(n)
+    @buf.rotate!(n)
+    self
+  end
+
+  def drop!(n=1)
+    @top += n
+  end
+
+  def drop(n=1)
+    dup.tap &:drop!
   end
 
   #------------------------------------------------------------
@@ -83,19 +84,14 @@ class Piece
 
   #------------------------------------------------------------
 
-  # def draw!
-  #   @a.each_with_index do |row, delta_y|
-  #     move_to(@top+delta_y, @left)
-  #     puts row.join
-  #   end
-  # end
+  def draw!
+    @buf.draw!(left, top)
+  end
 
-  # def each_xy
-  #   @a.each_with_index do |row, y|
-  #     row.each_with_index do |char, x|
-  #       yield x + @left, y + @top, char
-  #     end
-  #   end
-  # end
+  #------------------------------------------------------------
+
+  def to_s
+    @a.map { |row| row.join }.join("\n")
+  end
 
 end

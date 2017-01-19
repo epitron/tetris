@@ -5,24 +5,20 @@ require_relative 'piece'
 class Bag
 
   def initialize
-    reset!
-  end
-
-  def reset!
-    @bag = Piece.all.shuffle
+    @pieces = Piece.randomized_set
   end
 
   def refill!
-    @bag += PIECES.shuffle
+    @pieces += Piece.randomized_set
   end
 
   def take_piece!
-    @bag += PIECES.shuffle if @bag.size <= 2
-    @bag.shift
+    refill! if @pieces.size < 3
+    @pieces.shift
   end
 
   def peek
-    @bag.first
+    @pieces.first
   end
 
 end
